@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EV Towing Range Pro</title>
+    <title>EV Towing Assistant Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-xl border border-gray-800 my-6">
-        <h1 class="text-3xl font-black text-center mb-1 text-emerald-400">⚡ EV Towing Range Pro</h1>
-        <p class="text-gray-400 text-center text-sm mb-6">Pokročilá kalkulačka dojezdu elektromobilů s nákladem</p>
+    <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-xl border border-gray-800 my-6 transition-all duration-300" id="mainContainer">
+        <h1 class="text-3xl font-black text-center mb-1 text-emerald-400">⚡ EV Towing Assistant</h1>
+        <p class="text-gray-400 text-center text-sm mb-6">Chytrý asistent pro jízdu s přívěsem</p>
         
         <!-- 1. VÝBĚR AUTA -->
         <div class="mb-5 relative">
@@ -22,7 +22,7 @@
             <div id="selectedCarBadge" class="mt-2 p-3 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex justify-between items-center text-sm hidden">
                 <div>
                     <span class="font-bold text-emerald-400" id="badgeName">--</span>
-                    <span class="text-gray-400 block text-xs" id="badgeSpecs">Baterie: -- kWh | Spotřeba: -- kWh/105km</span>
+                    <span class="text-gray-400 block text-xs" id="badgeSpecs">--</span>
                 </div>
                 <button onclick="clearCarSelection()" class="text-gray-400 hover:text-rose-400 font-bold px-2">✕</button>
             </div>
@@ -32,11 +32,11 @@
         <div class="mb-5">
             <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400">2. Typ přívěsu</label>
             <select id="trailerSelect" class="w-full bg-gray-800 border border-gray-750 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                <option value="none">Žádný (Pouze samotné auto)</option>
-                <option value="small">Malý otevřený vozík (Nízký aerodynamický odpor)</option>
-                <option value="boat">Podvalník s autem / Loď (Střední odpor + vyšší váha)</option>
-                <option value="horses">Přepravník na koně (Vysoký odpor vzduchu + váha)</option>
-                <option value="caravan">Velký obytný karavan (Extrémní aerodynamický odpor)</option>
+                <option value="none">ℹ️ Žádný (Pouze samotné auto)</option>
+                <option value="small">🪵 Malý otevřený vozík (Nízký odpor)</option>
+                <option value="boat">⚓ Podvalník s autem / Loď (Střední odpor)</option>
+                <option value="horses">🐴 Přepravník na koně (Vysoký čelní odpor)</option>
+                <option value="caravan">🏠 Velký obytný karavan (Extrémní stěna)</option>
             </select>
         </div>
 
@@ -47,13 +47,18 @@
                 <span id="weightVal" class="text-emerald-400 font-bold">1 200 kg</span>
             </div>
             <input type="range" id="weightSlider" min="0" max="3500" step="50" value="1200" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+            
+            <!-- Varování o přetížení -->
+            <div id="weightWarning" class="mt-2 p-2.5 bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs rounded-lg hidden">
+                ⚠️ <strong>Pozor!</strong> Zvolená hmotnost překračuje limit tažného zařízení pro toto auto.
+            </div>
         </div>
 
-        <!-- 4. VNĚJŠÍ VLIVY (RYCHLOST, TEPLOTA, TERÉN) -->
-        <div class="bg-gray-850 p-4 rounded-xl border border-gray-800 mb-6 space-y-4">
+        <!-- 4. PODMÍNKY -->
+        <div class="bg-gray-850 p-4 rounded-xl border border-gray-800 mb-6 space-y-4 transition-colors duration-300" id="conditionsBox">
             <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-500/80 mb-2">4. Podmínky na trase</h3>
             
-            <!-- Rychlost jízdy -->
+            <!-- Rychlost -->
             <div>
                 <div class="flex justify-between text-sm mb-1">
                     <span class="text-gray-300">Cestovní rychlost na dálnici</span>
@@ -62,7 +67,7 @@
                 <input type="range" id="speedSlider" min="80" max="130" step="5" value="110" class="w-full h-1.5 bg-gray-750 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
 
-            <!-- Teplota vzduchu -->
+            <!-- Teplota -->
             <div>
                 <div class="flex justify-between text-sm mb-1">
                     <span class="text-gray-300">Venkovní teplota</span>
@@ -71,69 +76,87 @@
                 <input type="range" id="tempSlider" min="-10" max="35" step="5" value="20" class="w-full h-1.5 bg-gray-750 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
 
-            <!-- Profil trasy -->
+            <!-- Terén -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300">Profil a převýšení trasy</label>
                 <select id="terrainSelect" class="w-full bg-gray-800 border border-gray-750 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                    <option value="flat">Rovinatý profil (Česko kolem řek, dálnice D11)</option>
-                    <option value="hilly">Kopcovitý terén / Vysočina (Běžná D1, mírná stoupání)</option>
-                    <option value="mountains">Horský profil / Alpy (Dlouhá a prudká stoupání)</option>
+                    <option value="flat">⛰️ Rovinatý profil (Kolem řek, polabí)</option>
+                    <option value="hilly">⛰️ Kopcovitý terén / Vysočina (Běžná D1)</option>
+                    <option value="mountains">🏔️ Horský profil / Alpy (Prudká stoupání)</option>
                 </select>
             </div>
         </div>
 
-        <!-- TLAČÍTKO PRO VÝPOČET -->
+        <!-- VÝPOČET -->
         <button onclick="calculateRange()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold py-3.5 px-4 rounded-xl transition duration-200 transform active:scale-[0.98] shadow-lg shadow-emerald-500/10">
-            Vypočítat reálný dojezd
+            Vypočítat a zkontrolovat trasu
         </button>
 
         <!-- VÝSLEDKY -->
-        <div id="resultBox" class="mt-6 p-5 bg-gray-850 border border-gray-800 rounded-xl hidden">
-            <div class="text-center">
-                <p class="text-gray-400 text-xs uppercase tracking-widest font-semibold">Garantovaný bezpečný dojezd</p>
-                <p id="towingRange" class="text-5xl font-black text-emerald-400 my-3">-- km</p>
+        <div id="resultBox" class="mt-6 p-5 bg-gray-850 border border-gray-800 rounded-xl hidden space-y-4">
+            <div class="grid grid-cols-2 gap-4 text-center">
+                <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-800">
+                    <p class="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Teoretický dojezd (do 0 %)</p>
+                    <p id="towingRange" class="text-3xl font-black text-gray-300 my-1">-- km</p>
+                </div>
+                <div class="bg-emerald-950/20 p-3 rounded-xl border border-emerald-500/20">
+                    <p class="text-emerald-400 text-[10px] uppercase tracking-wider font-bold">Bezpečný dojezd (s 10% rezervou)</p>
+                    <p id="safeRange" class="text-3xl font-black text-emerald-400 my-1">-- km</p>
+                </div>
             </div>
-            <div class="border-t border-gray-800 mt-4 pt-4 text-xs text-gray-400 space-y-2">
-                <div class="flex justify-between"><span>Původní tabulkový dojezd (bez nákladu):</span><span id="baseRange" class="font-medium text-gray-200">-- km</span></div>
-                <div class="flex justify-between"><span>Průměrná spotřeba v této konfiguraci:</span><span id="newConsumption" class="font-medium text-gray-200">-- kWh/100 km</span></div>
-                <div class="flex justify-between text-rose-400 font-semibold"><span>Celková ztráta energie vlivem podmínek:</span><span id="dropPercent">-- %</span></div>
+
+            <!-- Specifikace a spotřeba -->
+            <div class="border-t border-gray-800 pt-3 text-xs text-gray-400 space-y-1.5">
+                <div class="flex justify-between"><span>Původní dojezd bez nákladu:</span><span id="baseRange" class="font-medium text-gray-200">-- km</span></div>
+                <div class="flex justify-between"><span>Předpokládaná spotřeba s vlekem:</span><span id="newConsumption" class="font-medium text-gray-200">-- kWh/100 km</span></div>
+                <div class="flex justify-between text-rose-400"><span>Celkový pokles energie:</span><span id="dropPercent">-- %</span></div>
             </div>
+
+            <!-- Inteligentní asistent - Tipy pro řidiče -->
+            <div id="smartTipBox" class="p-3 bg-blue-950/30 border border-blue-500/20 text-blue-300 text-xs rounded-xl flex items-start gap-2">
+                <span>💡</span>
+                <p id="smartTipText">--</p>
+            </div>
+
+            <!-- Mapové tlačítko -->
+            <a id="mapsButton" target="_blank" class="w-full bg-gray-800 hover:bg-gray-750 border border-gray-700 text-white font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer">
+                🔍 Vyhledat velké nabíječky pro soupravy v okolí
+            </a>
         </div>
     </div>
 
     <script>
-        // Rozsáhlá integrovaná databáze elektroaut
+        // Databáze rozšířená o limit tažného zařízení (maxTow v kg)
         const evDatabase = [
-            { id: "audi_q4_40", name: "Audi Q4 e-tron 40", battery: 76.6, consumption: 18.3 },
-            { id: "audi_q8_55", name: "Audi Q8 e-tron 55", battery: 106.0, consumption: 21.4 },
-            { id: "bmw_ix_xdrive40", name: "BMW iX xDrive40", battery: 71.0, consumption: 20.0 },
-            { id: "bmw_ix_xdrive50", name: "BMW iX xDrive50", battery: 105.2, consumption: 20.5 },
-            { id: "bmw_i4_edrive40", name: "BMW i4 eDrive40", battery: 80.7, consumption: 16.9 },
-            { id: "byd_tang", name: "BYD Tang EV", battery: 108.8, consumption: 23.8 },
-            { id: "ford_mach_e_er", name: "Ford Mustang Mach-E ER", battery: 91.0, consumption: 18.5 },
-            { id: "ford_f150_lightning", name: "Ford F-150 Lightning Extended", battery: 131.0, consumption: 28.5 },
-            { id: "hyundai_ioniq5_lr", name: "Hyundai Ioniq 5 Long Range AWD", battery: 74.0, consumption: 18.0 },
-            { id: "hyundai_ioniq6_lr", name: "Hyundai Ioniq 6 Long Range RWD", battery: 74.0, consumption: 14.9 },
-            { id: "kia_ev6_lr_awd", name: "Kia EV6 Long Range AWD", battery: 74.0, consumption: 18.2 },
-            { id: "kia_ev9_awd", name: "Kia EV9 Baseline AWD", battery: 96.0, consumption: 22.8 },
-            { id: "mercedes_eqe_350", name: "Mercedes-Benz EQE SUV 350+", battery: 90.6, consumption: 19.1 },
-            { id: "mercedes_eqs_580", name: "Mercedes-Benz EQS SUV 580 4MATIC", battery: 118.0, consumption: 23.2 },
-            { id: "nissan_ariya_87", name: "Nissan Ariya 87kWh", battery: 87.0, consumption: 19.5 },
-            { id: "porsche_taycan_4s", name: "Porsche Taycan 4S Performance Plus", battery: 83.7, consumption: 20.2 },
-            { id: "skoda_enyaq_85", name: "Škoda Enyaq 85", battery: 77.0, consumption: 16.5 },
-            { id: "skoda_enyaq_rs", name: "Škoda Enyaq RS iV", battery: 77.0, consumption: 17.8 },
-            { id: "tesla_3_lr", name: "Tesla Model 3 Long Range", battery: 75.0, consumption: 14.7 },
-            { id: "tesla_y_sr", name: "Tesla Model Y Standard Range", battery: 57.5, consumption: 15.7 },
-            { id: "tesla_y_lr", name: "Tesla Model Y Long Range AWD", battery: 75.0, consumption: 16.9 },
-            { id: "tesla_x_lr", name: "Tesla Model X Long Range", battery: 95.0, consumption: 19.8 },
-            { id: "volvo_xc40_er", name: "Volvo EX40 / XC40 Recharge ER", battery: 78.0, consumption: 17.6 },
-            { id: "volvo_ex90_twin", name: "Volvo EX90 Twin Motor", battery: 107.0, consumption: 21.1 },
-            { id: "vw_id4_pro", name: "Volkswagen ID.4 Pro", battery: 77.0, consumption: 17.2 },
-            { id: "vw_id7_pro", name: "Volkswagen ID.7 Pro", battery: 77.0, consumption: 15.3 },
-            { id: "vw_id_buzz", name: "Volkswagen ID. Buzz Pro", battery: 77.0, consumption: 21.5 }
+            { id: "audi_q4_40", name: "Audi Q4 e-tron 40", battery: 76.6, consumption: 18.3, maxTow: 1000 },
+            { id: "audi_q8_55", name: "Audi Q8 e-tron 55", battery: 106.0, consumption: 21.4, maxTow: 1800 },
+            { id: "bmw_ix_xdrive40", name: "BMW iX xDrive40", battery: 71.0, consumption: 20.0, maxTow: 2500 },
+            { id: "bmw_ix_xdrive50", name: "BMW iX xDrive50", battery: 105.2, consumption: 20.5, maxTow: 2500 },
+            { id: "bmw_i4_edrive40", name: "BMW i4 eDrive40", battery: 80.7, consumption: 16.9, maxTow: 1600 },
+            { id: "byd_tang", name: "BYD Tang EV", battery: 108.8, consumption: 23.8, maxTow: 1500 },
+            { id: "ford_mach_e_er", name: "Ford Mustang Mach-E ER", battery: 91.0, consumption: 18.5, maxTow: 1500 },
+            { id: "ford_f150_lightning", name: "Ford F-150 Lightning Extended", battery: 131.0, consumption: 28.5, maxTow: 3500 },
+            { id: "hyundai_ioniq5_lr", name: "Hyundai Ioniq 5 Long Range AWD", battery: 74.0, consumption: 18.0, maxTow: 1600 },
+            { id: "hyundai_ioniq6_lr", name: "Hyundai Ioniq 6 Long Range RWD", battery: 74.0, consumption: 14.9, maxTow: 1500 },
+            { id: "kia_ev6_lr_awd", name: "Kia EV6 Long Range AWD", battery: 74.0, consumption: 18.2, maxTow: 1600 },
+            { id: "kia_ev9_awd", name: "Kia EV9 Baseline AWD", battery: 96.0, consumption: 22.8, maxTow: 2500 },
+            { id: "mercedes_eqe_350", name: "Mercedes-Benz EQE SUV 350+", battery: 90.6, consumption: 19.1, maxTow: 1800 },
+            { id: "mercedes_eqs_580", name: "Mercedes-Benz EQS SUV 580 4MATIC", battery: 118.0, consumption: 23.2, maxTow: 1800 },
+            { id: "nissan_ariya_87", name: "Nissan Ariya 87kWh", battery: 87.0, consumption: 19.5, maxTow: 1500 },
+            { id: "porsche_taycan_4s", name: "Porsche Taycan 4S Plus", battery: 83.7, consumption: 20.2, maxTow: 0 },
+            { id: "skoda_enyaq_85", name: "Škoda Enyaq 85", battery: 77.0, consumption: 16.5, maxTow: 1000 },
+            { id: "skoda_enyaq_rs", name: "Škoda Enyaq RS iV", battery: 77.0, consumption: 17.8, maxTow: 1200 },
+            { id: "tesla_3_lr", name: "Tesla Model 3 Long Range", battery: 75.0, consumption: 14.7, maxTow: 1000 },
+            { id: "tesla_y_sr", name: "Tesla Model Y Standard Range", battery: 57.5, consumption: 15.7, maxTow: 1600 },
+            { id: "tesla_y_lr", name: "Tesla Model Y Long Range AWD", battery: 75.0, consumption: 16.9, maxTow: 1600 },
+            { id: "tesla_x_lr", name: "Tesla Model X Long Range", battery: 95.0, consumption: 19.8, maxTow: 2250 },
+            { id: "volvo_xc40_er", name: "Volvo EX40 / XC40 Recharge ER", battery: 78.0, consumption: 17.6, maxTow: 1800 },
+            { id: "volvo_ex90_twin", name: "Volvo EX90 Twin Motor", battery: 107.0, consumption: 21.1, maxTow: 2200 },
+            { id: "vw_id4_pro", name: "Volkswagen ID.4 Pro", battery: 77.0, consumption: 17.2, maxTow: 1000 },
+            { id: "vw_id7_pro", name: "Volkswagen ID.7 Pro", battery: 77.0, consumption: 15.3, maxTow: 1000 },
+            { id: "vw_id_buzz", name: "Volkswagen ID. Buzz Pro", battery: 77.0, consumption: 21.5, maxTow: 1000 }
         ];
 
-        // Konfigurace odporů přívěsů
         const trailerConfig = {
             none: { aero: 1.0, weightImpact: 0.0 },
             small: { aero: 1.18, weightImpact: 0.07 },
@@ -144,10 +167,13 @@
 
         let selectedCar = null;
 
-        // UI Slidery
+        // UI Manipulace se slidery a dynamické barvy
         const weightSlider = document.getElementById('weightSlider');
         const weightVal = document.getElementById('weightVal');
-        weightSlider.oninput = function() { weightVal.innerHTML = parseInt(this.value).toLocaleString('cs-CZ') + " kg"; }
+        weightSlider.oninput = function() {
+            weightVal.innerHTML = parseInt(this.value).toLocaleString('cs-CZ') + " kg";
+            checkTowingLimit();
+        }
 
         const speedSlider = document.getElementById('speedSlider');
         const speedVal = document.getElementById('speedVal');
@@ -155,12 +181,40 @@
 
         const tempSlider = document.getElementById('tempSlider');
         const tempVal = document.getElementById('tempVal');
+        const conditionsBox = document.getElementById('conditionsBox');
         tempSlider.oninput = function() {
-            let note = this.value < 5 ? " (Mrazivo / Topení)" : (this.value > 30 ? " (Horko / Klima)" : " (Ideální)");
-            tempVal.innerHTML = this.value + " °C" + note;
+            let val = parseInt(this.value);
+            let note = " (Ideální)";
+            
+            // Dynamická změna vizuálu podle teploty
+            conditionsBox.className = "p-4 rounded-xl border mb-6 space-y-4 transition-all duration-300";
+            if (val < 5) {
+                note = " (Mrazivo / Topení ❄️)";
+                conditionsBox.classList.add("bg-blue-950/20", "border-blue-500/20");
+            } else if (val > 28) {
+                note = " (Horko / Klimatizace ☀️)";
+                conditionsBox.classList.add("bg-amber-955/10", "border-amber-500/20");
+            } else {
+                conditionsBox.classList.add("bg-gray-850", "border-gray-800");
+            }
+            tempVal.innerHTML = val + " °C" + note;
         }
 
-        // Vyhledávací logika
+        // Hlídání přetížení
+        function checkTowingLimit() {
+            if (!selectedCar) return;
+            const currentWeight = parseFloat(weightSlider.value);
+            const warningBox = document.getElementById('weightWarning');
+            
+            if (currentWeight > selectedCar.maxTow) {
+                warningBox.innerHTML = `⚠️ <strong>Pozor!</strong> Zvolená hmotnost (${currentWeight} kg) překračuje povolený limit tažného zařízení pro ${selectedCar.name} (Max ${selectedCar.maxTow} kg).`;
+                warningBox.classList.remove('hidden');
+            } else {
+                warningBox.classList.add('hidden');
+            }
+        }
+
+        // Vyhledávání aut
         const searchInput = document.getElementById('carSearch');
         const dropdown = document.getElementById('searchDropdown');
         const badge = document.getElementById('selectedCarBadge');
@@ -187,32 +241,30 @@
             dropdown.classList.remove('hidden');
         });
 
-        document.addEventListener('click', (e) => {
-            if (e.target !== searchInput && e.target !== dropdown) dropdown.classList.add('hidden');
-        });
-
         function selectCar(car) {
             selectedCar = car;
             searchInput.value = '';
             dropdown.classList.add('hidden');
             searchInput.classList.add('hidden');
             document.getElementById('badgeName').innerText = car.name;
-            document.getElementById('badgeSpecs').innerText = `Baterie: ${car.battery} kWh | Základní spotřeba: ${car.consumption} kWh/100km`;
+            document.getElementById('badgeSpecs').innerText = `Baterie: ${car.battery} kWh | Max. tažné: ${car.maxTow} kg`;
             badge.classList.remove('hidden');
+            checkTowingLimit();
         }
 
         function clearCarSelection() {
             selectedCar = null;
             badge.classList.add('hidden');
+            document.getElementById('weightWarning').classList.add('hidden');
             searchInput.classList.remove('hidden');
             searchInput.focus();
             document.getElementById('resultBox').classList.add('hidden');
         }
 
-        // Pokročilé jádro matematického výpočtu
+        // Výpočet
         function calculateRange() {
             if (!selectedCar) {
-                alert("Vyberte prosím nejdříve auto ze seznamu.");
+                alert("Zvolte nejdříve vozidlo.");
                 searchInput.focus();
                 return;
             }
@@ -222,58 +274,59 @@
             const speed = parseFloat(speedSlider.value);
             const temperature = parseFloat(tempSlider.value);
             const terrain = document.getElementById('terrainSelect').value;
-            
             const config = trailerConfig[trailerKey];
 
-            // 1. Základní dojezd bez nákladu za ideálních podmínek
+            // Základní kalkulace
             const baseRange = (selectedCar.battery / selectedCar.consumption) * 100;
-
-            // 2. Vliv rychlosti (Aerodynamický odpor roste kvadraticky)
-            // Referenční spotřeba v databázi počítá s kombinovanou rychlostí kolem 90-100 km/h
             const speedFactor = Math.pow(speed / 95, 2);
             let currentConsumption = selectedCar.consumption;
 
-            // 3. Aplikace odporu přívěsu kombinovaného s rychlostním faktorem
             if (trailerKey !== 'none') {
-                // S vlekem má rychlost drastičtější vliv kvůli obrovské čelní ploše
                 currentConsumption = selectedCar.consumption * (1 + (config.aero - 1) * speedFactor * 1.2);
-                
-                // Přičtení váhy přívěsu (valivý mechanický odpor)
-                const weightInTons = weight / 1000;
-                currentConsumption += (weightInTons * config.weightImpact * 16);
+                currentConsumption += ((weight / 1000) * config.weightImpact * 16);
             } else {
-                // Samotné auto bez vleku
                 currentConsumption = selectedCar.consumption * speedFactor;
             }
 
-            // 4. Vliv teploty (vliv topení v zimě nebo klimatizace v horku + efektivita chemie baterie)
-            let tempMultiplier = 1.0;
-            if (temperature < 10) {
-                // Lineární penalizace za mráz (až +25% spotřeby při -10°C)
-                tempMultiplier += (10 - temperature) * 0.012; 
-            } else if (temperature > 28) {
-                // Mírná penalizace za klimatizaci v extrémním horku
-                tempMultiplier += (temperature - 28) * 0.006;
+            // Teplota a terén
+            if (temperature < 10) currentConsumption *= (1 + (10 - temperature) * 0.012);
+            else if (temperature > 28) currentConsumption *= (1 + (temperature - 28) * 0.006);
+
+            if (terrain === 'hilly') currentConsumption *= 1.08;
+            if (terrain === 'mountains') currentConsumption *= 1.22;
+
+            // Výsledky dojezdů
+            let finalRange = (selectedCar.battery / currentConsumption) * 100;
+            if (finalRange < 0) finalRange = 0;
+            
+            // Bezpečná rezerva (odečítáme 10 % celkové kapacity baterie jako rezervu pro příjezd k nabíječce)
+            let safeRange = ((selectedCar.battery * 0.9) / currentConsumption) * 100;
+            if (safeRange < 0) safeRange = 0;
+
+            let dropPercent = ((baseRange - finalRange) / baseRange) * 100;
+
+            // Generování inteligentního doporučení
+            let tipText = "Vaše konfigurace je vyvážená. Šťastnou cestu!";
+            if (trailerKey !== 'none' && speed > 95) {
+                let savedKm = Math.round(finalRange * 0.18);
+                tipText = `Zpomalením ze ${speed} km/h na 90 km/h zvýšíte bezpečný dojezd přibližně o ${savedKm} km a snížíte turbulence za vozidlem.`;
+            } else if (temperature < 0) {
+                tipText = "V mrazu doporučujeme předhřát auto i baterii ještě během připojení na nabíječku, ušetříte energii na topení za jízdy.";
+            } else if (terrain === 'mountains') {
+                tipText = "Při jízde z kopce v horách nechte auto maximálně rekuperovat. Váha přívěsu pomůže vrátit podstatnou část energie zpět do baterie.";
             }
-            currentConsumption *= tempMultiplier;
 
-            // 5. Vliv terénu a výškového profilu
-            let terrainMultiplier = 1.0;
-            if (terrain === 'hilly') terrainMultiplier = 1.08;     // Vysočina (+8%)
-            if (terrain === 'mountains') terrainMultiplier = 1.22; // Alpy (+22%)
-            currentConsumption *= terrainMultiplier;
+            // Nastavení odkazu pro vyhledávání nabíječek
+            const mapsBtn = document.getElementById('mapsButton');
+            mapsBtn.href = `https://www.google.com/maps/search/ionity+ultra+fast+charging+station/`;
 
-            // 6. Finální výsledky
-            let finalTowingRange = (selectedCar.battery / currentConsumption) * 100;
-            let dropPercent = ((baseRange - finalTowingRange) / baseRange) * 100;
-
-            if (finalTowingRange < 0) finalTowingRange = 0;
-
-            // Vykreslení do tabulky
+            // Zobrazení prvků v UI
             document.getElementById('baseRange').innerText = Math.round(baseRange) + " km";
             document.getElementById('newConsumption').innerText = currentConsumption.toFixed(1) + " kWh/100 km";
-            document.getElementById('towingRange').innerText = Math.round(finalTowingRange) + " km";
+            document.getElementById('towingRange').innerText = Math.round(finalRange) + " km";
+            document.getElementById('safeRange').innerText = Math.round(safeRange) + " km";
             document.getElementById('dropPercent').innerText = Math.round(dropPercent) + " %";
+            document.getElementById('smartTipText').innerText = tipText;
             
             document.getElementById('resultBox').classList.remove('hidden');
         }
