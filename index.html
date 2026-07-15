@@ -5,21 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EV Towing Assistant Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styl pro slider, aby ladil do neonově smaragdové */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+    </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-xl border border-gray-800 my-6 transition-all duration-300" id="mainContainer">
-        <h1 class="text-3xl font-black text-center mb-1 text-emerald-400">⚡ EV Towing Assistant</h1>
-        <p class="text-gray-400 text-center text-sm mb-6">Chytrý asistent pro jízdu s přívěsem</p>
+    <!-- JAZYKOVÝ PŘEPÍNAČ -->
+    <div class="w-full max-w-xl flex justify-end mb-2">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-1 flex gap-1 text-xs">
+            <button onclick="switchLanguage('cs')" id="lang-cs" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-emerald-500 text-gray-950">CZ 🇨🇿</button>
+            <button onclick="switchLanguage('en')" id="lang-en" class="px-3 py-1.5 rounded-lg font-bold transition-all text-gray-400 hover:text-white">EN 🇬🇧</button>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 p-6 rounded-2xl shadow-2xl w-full max-w-xl border border-gray-800 mb-6 transition-all duration-300" id="mainContainer">
+        <h1 class="text-3xl font-black text-center mb-1 text-emerald-400 flex items-center justify-center gap-2">
+            <span>⚡</span> <span id="ui-title">EV Towing Assistant</span>
+        </h1>
+        <p class="text-gray-400 text-center text-sm mb-6" id="ui-subtitle">Chytrý asistent pro jízdu s přívěsem</p>
         
         <!-- 1. VÝBĚR AUTA -->
         <div class="mb-5 relative">
-            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400">1. Elektromobil</label>
-            <input type="text" id="carSearch" placeholder="Napište značku nebo model (např. Tesla, Enyaq...)" class="w-full bg-gray-800 border border-gray-750 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400" id="ui-label-car">1. Elektromobil</label>
+            <input type="text" id="carSearch" class="w-full bg-gray-800 border border-gray-750 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
             
             <div id="searchDropdown" class="absolute left-0 right-0 mt-1 bg-gray-850 border border-gray-750 rounded-xl max-h-60 overflow-y-auto z-50 hidden shadow-xl divide-y divide-gray-800"></div>
             
-            <div id="selectedCarBadge" class="mt-2 p-3 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex justify-between items-center text-sm hidden">
+            <div id="selectedCarBadge" class="mt-2 p-3 bg-emerald-950/30 border border-emerald-500/20 rounded-xl flex justify-between items-center text-sm">
                 <div>
                     <span class="font-bold text-emerald-400" id="badgeName">--</span>
                     <span class="text-gray-400 block text-xs" id="badgeSpecs">--</span>
@@ -30,38 +53,34 @@
 
         <!-- 2. TYP NÁKLADU -->
         <div class="mb-5">
-            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400">2. Typ přívěsu</label>
-            <select id="trailerSelect" class="w-full bg-gray-800 border border-gray-750 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                <option value="none">ℹ️ Žádný (Pouze samotné auto)</option>
-                <option value="small">🪵 Malý otevřený vozík (Nízký odpor)</option>
-                <option value="boat">⚓ Podvalník s autem / Loď (Střední odpor)</option>
-                <option value="horses">🐴 Přepravník na koně (Vysoký čelní odpor)</option>
-                <option value="caravan">🏠 Velký obytný karavan (Extrémní stěna)</option>
+            <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400" id="ui-label-trailer">2. Typ přívěsu</label>
+            <select id="trailerSelect" onchange="calculateRange()" class="w-full bg-gray-800 border border-gray-750 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                <!-- Naplněno dynamicky podle jazyka -->
             </select>
         </div>
 
         <!-- 3. HMOTNOST NÁKLADU -->
         <div class="mb-5">
             <div class="flex justify-between text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400">
-                <span>3. Celková hmotnost vlek + náklad</span>
+                <span id="ui-label-weight">3. Celková hmotnost vlek + náklad</span>
                 <span id="weightVal" class="text-emerald-400 font-bold">1 200 kg</span>
             </div>
             <input type="range" id="weightSlider" min="0" max="3500" step="50" value="1200" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             
             <!-- Varování o přetížení -->
             <div id="weightWarning" class="mt-2 p-2.5 bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs rounded-lg hidden">
-                ⚠️ <strong>Pozor!</strong> Zvolená hmotnost překračuje limit tažného zařízení pro toto auto.
+                <!-- Dynamické varování -->
             </div>
         </div>
 
         <!-- 4. PODMÍNKY -->
         <div class="bg-gray-850 p-4 rounded-xl border border-gray-800 mb-6 space-y-4 transition-colors duration-300" id="conditionsBox">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-500/80 mb-2">4. Podmínky na trase</h3>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-500/80 mb-2" id="ui-label-conditions">4. Podmínky na trase</h3>
             
             <!-- Rychlost -->
             <div>
                 <div class="flex justify-between text-sm mb-1">
-                    <span class="text-gray-300">Cestovní rychlost na dálnici</span>
+                    <span class="text-gray-300" id="ui-label-speed">Cestovní rychlost na dálnici</span>
                     <span id="speedVal" class="font-bold text-gray-200">110 km/h</span>
                 </div>
                 <input type="range" id="speedSlider" min="80" max="130" step="5" value="110" class="w-full h-1.5 bg-gray-750 rounded-lg appearance-none cursor-pointer accent-emerald-500">
@@ -70,46 +89,44 @@
             <!-- Teplota -->
             <div>
                 <div class="flex justify-between text-sm mb-1">
-                    <span class="text-gray-300">Venkovní teplota</span>
-                    <span id="tempVal" class="font-bold text-gray-200">20 °C (Ideální)</span>
+                    <span class="text-gray-300" id="ui-label-temp">Venkovní teplota</span>
+                    <span id="tempVal" class="font-bold text-gray-200">20 °C</span>
                 </div>
                 <input type="range" id="tempSlider" min="-10" max="35" step="5" value="20" class="w-full h-1.5 bg-gray-750 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
 
             <!-- Terén -->
             <div>
-                <label class="block text-sm mb-1 text-gray-300">Profil a převýšení trasy</label>
-                <select id="terrainSelect" class="w-full bg-gray-800 border border-gray-750 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                    <option value="flat">⛰️ Rovinatý profil (Kolem řek, polabí)</option>
-                    <option value="hilly">⛰️ Kopcovitý terén / Vysočina (Běžná D1)</option>
-                    <option value="mountains">🏔️ Horský profil / Alpy (Prudká stoupání)</option>
+                <label class="block text-sm mb-1 text-gray-300" id="ui-label-terrain">Profil a převýšení trasy</label>
+                <select id="terrainSelect" onchange="calculateRange()" class="w-full bg-gray-800 border border-gray-750 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                    <!-- Naplněno dynamicky -->
                 </select>
             </div>
         </div>
 
         <!-- VÝPOČET -->
-        <button onclick="calculateRange()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold py-3.5 px-4 rounded-xl transition duration-200 transform active:scale-[0.98] shadow-lg shadow-emerald-500/10 mb-6">
+        <button onclick="calculateRange()" id="ui-btn-calc" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold py-3.5 px-4 rounded-xl transition duration-200 transform active:scale-[0.98] shadow-lg shadow-emerald-500/10 mb-6">
             Vypočítat a zkontrolovat trasu
         </button>
 
         <!-- VÝSLEDKY -->
-        <div id="resultBox" class="mt-6 p-5 bg-gray-850 border border-gray-800 rounded-xl hidden space-y-4 mb-6">
+        <div id="resultBox" class="mt-6 p-5 bg-gray-850 border border-gray-800 rounded-xl space-y-4 mb-6">
             <div class="grid grid-cols-2 gap-4 text-center">
                 <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-800">
-                    <p class="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Teoretický dojezd (do 0 %)</p>
+                    <p class="text-gray-400 text-[10px] uppercase tracking-wider font-semibold" id="ui-res-theory">Teoretický dojezd (do 0 %)</p>
                     <p id="towingRange" class="text-3xl font-black text-gray-300 my-1">-- km</p>
                 </div>
                 <div class="bg-emerald-950/20 p-3 rounded-xl border border-emerald-500/20">
-                    <p class="text-emerald-400 text-[10px] uppercase tracking-wider font-bold">Bezpečný dojezd (s 10% rezervou)</p>
+                    <p class="text-emerald-400 text-[10px] uppercase tracking-wider font-bold" id="ui-res-safe">Bezpečný dojezd (s 10% rezervou)</p>
                     <p id="safeRange" class="text-3xl font-black text-emerald-400 my-1">-- km</p>
                 </div>
             </div>
 
             <!-- Specifikace a spotřeba -->
             <div class="border-t border-gray-800 pt-3 text-xs text-gray-400 space-y-1.5">
-                <div class="flex justify-between"><span>Původní dojezd bez nákladu:</span><span id="baseRange" class="font-medium text-gray-200">-- km</span></div>
-                <div class="flex justify-between"><span>Předpokládaná spotřeba s vlekem:</span><span id="newConsumption" class="font-medium text-gray-200">-- kWh/100 km</span></div>
-                <div class="flex justify-between text-rose-400"><span>Celkový pokles energie:</span><span id="dropPercent">-- %</span></div>
+                <div class="flex justify-between"><span id="ui-res-base">Původní dojezd bez nákladu:</span><span id="baseRange" class="font-medium text-gray-200">-- km</span></div>
+                <div class="flex justify-between"><span id="ui-res-cons">Předpokládaná spotřeba s vlekem:</span><span id="newConsumption" class="font-medium text-gray-200">-- kWh/100 km</span></div>
+                <div class="flex justify-between text-rose-400"><span id="ui-res-drop">Celkový pokles energie:</span><span id="dropPercent">-- %</span></div>
             </div>
 
             <!-- Inteligentní asistent - Tipy pro řidiče -->
@@ -120,46 +137,155 @@
 
             <!-- Mapové tlačítko -->
             <a id="mapsButton" target="_blank" class="w-full bg-gray-800 hover:bg-gray-750 border border-gray-700 text-white font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer">
-                🔍 Vyhledat velké nabíječky pro soupravy v okolí
+                🔍 <span id="ui-btn-maps">Vyhledat velké nabíječky pro soupravy v okolí</span>
             </a>
         </div>
 
-        <!-- SEKCE PODPORY: TVŮJ REVOLUT ÚČET -->
+        <!-- SEKCE PODPORY -->
         <div class="border-t border-gray-800 pt-4 mt-6 text-center">
-            <p class="text-xs text-gray-500 mb-2">Líbí se vám tato aplikace a pomohla vám na cestách?</p>
+            <p class="text-xs text-gray-500 mb-2" id="ui-support-text">Líbí se vám tato aplikace a pomohla vám na cestách?</p>
             <button onclick="toggleDonateModal(true)" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold py-2 px-4 rounded-xl text-xs transition duration-200 shadow-md">
-                ☕ Podpořit autora dobrovolným příspěvkem
+                ☕ <span id="ui-btn-support">Podpořit autora dobrovolným příspěvkem</span>
             </button>
         </div>
     </div>
 
-    <!-- MODAL OKNO S REVOLUTEM A QR KÓDEM -->
+    <!-- MODAL OKNO S REVOLUTEM -->
     <div id="donateModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl max-w-sm w-full text-center relative shadow-2xl">
             <button onclick="toggleDonateModal(false)" class="absolute top-3 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
             
-            <h3 class="text-xl font-black text-amber-400 mb-1">☕ Dobrovolná podpora</h3>
-            <p class="text-xs text-gray-400 mb-4">Děkuji za jakoukoliv podporu provozu a vývoje!</p>
+            <h3 class="text-xl font-black text-amber-400 mb-1" id="ui-modal-title">☕ Dobrovolná podpora</h3>
+            <p class="text-xs text-gray-400 mb-4" id="ui-modal-desc">Děkuji za jakoukoliv podporu provozu a vývoje!</p>
             
+            <!-- Rychlá tlačítka pro dary přes revolut.me -->
+            <div class="grid grid-cols-3 gap-2 mb-4">
+                <a href="https://revolut.me/marceldrvota/5" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">5 EUR</a>
+                <a href="https://revolut.me/marceldrvota/10" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">10 EUR</a>
+                <a href="https://revolut.me/marceldrvota/20" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">20 EUR</a>
+            </div>
+
             <!-- IBAN A BIC (Tvůj Revolut) -->
             <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 mb-4 text-left select-all cursor-pointer" title="Kliknutím označíte text">
-                <span class="text-gray-500 block text-[10px] uppercase tracking-wider font-bold mb-1">Bankovní spojení (Revolut)</span>
+                <span class="text-gray-500 block text-[10px] uppercase tracking-wider font-bold mb-1" id="ui-modal-bank">Bankovní spojení (Revolut)</span>
                 <div class="text-xs space-y-1">
                     <p class="font-mono text-gray-200"><strong class="text-gray-400">IBAN:</strong> LT80 3250 0696 3376 1109</p>
                     <p class="font-mono text-gray-200"><strong class="text-gray-400">BIC / SWIFT:</strong> REVOLT21</p>
                 </div>
             </div>
 
-            <!-- EVROPSKÝ EPC QR KÓD PŘÍMO PRO TVŮJ REVOLUT -->
+            <!-- EPC QR KÓD -->
             <div class="bg-white p-3 rounded-xl inline-block mb-3">
                 <img id="qrCodeImg" src="https://api.paylibo.com/paylibo/generator/image?iban=LT803250069633761109&amount=5.00&currency=EUR&message=Donate%20EV%20Assistant&size=180" alt="QR Platba Revolut" class="w-40 h-40">
             </div>
             
-            <p class="text-[10px] text-gray-500">Naskenujte QR kód ve své bankovní aplikaci. Částka je přednastavena na 5 EUR (lze ji v bance libovolně změnit).</p>
+            <p class="text-[10px] text-gray-500" id="ui-modal-qr-note">Naskenujte QR kód ve své bankovní aplikaci. Částka je přednastavena na 5 EUR (lze ji v bance libovolně změnit).</p>
         </div>
     </div>
 
     <script>
+        // Jazykové balíčky
+        const langData = {
+            cs: {
+                title: "EV Towing Assistant",
+                subtitle: "Chytrý asistent pro jízdu s přívěsem",
+                labelCar: "1. Elektromobil",
+                placeholderCar: "Napište značku nebo model (např. Tesla, Enyaq...)",
+                labelTrailer: "2. Typ přívěsu",
+                labelWeight: "3. Celková hmotnost vlek + náklad",
+                labelConditions: "4. Podmínky na trase",
+                labelSpeed: "Cestovní rychlost na dálnici",
+                labelTemp: "Venkovní teplota",
+                labelTerrain: "Profil a převýšení trasy",
+                btnCalc: "Vypočítat a zkontrolovat trasu",
+                resTheory: "Teoretický dojezd (do 0 %)",
+                resSafe: "Bezpečný dojezd (s 10% rezervou)",
+                resBase: "Původní dojezd bez nákladu:",
+                resCons: "Předpokládaná spotřeba s vlekem:",
+                resDrop: "Celkový pokles energie:",
+                btnMaps: "Vyhledat velké nabíječky pro soupravy v okolí",
+                supportText: "Líbí se vám tato aplikace a pomohla vám na cestách?",
+                btnSupport: "Podpořit autora dobrovolným příspěvkem",
+                modalTitle: "☕ Dobrovolná podpora",
+                modalDesc: "Děkuji za jakoukoliv podporu provozu a vývoje!",
+                modalBank: "Bankovní spojení (Revolut)",
+                modalQrNote: "Naskenujte QR kód ve své bankovní aplikaci. Částka je přednastavena na 5 EUR.",
+                overweightWarn: "⚠️ <strong>Pozor!</strong> Zvolená hmotnost ({weight} kg) překračuje povolený limit tažného zařízení pro {car} (Max {max} kg).",
+                alertSelectCar: "Zvolte nejdříve vozidlo.",
+                trailers: {
+                    none: "ℹ️ Žádný (Pouze samotné auto)",
+                    small: "🪵 Malý otevřený vozík (Nízký odpor)",
+                    boat: "⚓ Podvalník s autem / Loď (Střední odpor)",
+                    horses: "🐴 Přepravník na koně (Vysoký čelní odpor)",
+                    caravan: "🏠 Velký obytný karavan (Extrémní stěna)"
+                },
+                terrains: {
+                    flat: "⛰️ Rovinatý profil (Kolem řek, polabí)",
+                    hilly: "⛰️ Kopcovitý terén / Vysočina (Běžná D1)",
+                    mountains: "🏔️ Horský profil / Alpy (Prudká stoupání)"
+                },
+                tempIdeal: "Ideální",
+                tempCold: "Mrazivo / Topení ❄️",
+                tempHot: "Horko / Klimatizace ☀️",
+                tips: {
+                    balanced: "Vaše konfigurace je vyvážená. Šťastnou cestu!",
+                    slowDown: "Zpomalením ze {speed} km/h na 90 km/h zvýšíte bezpečný dojezd přibližně o {saved} km a snížíte turbulence za vozidlem.",
+                    preheat: "V mrazu doporučujeme předhřát auto i baterii ještě během připojení na nabíječku, ušetříte energii na topení za jízdy.",
+                    recup: "Při jízde z kopce v horách nechte auto maximálně rekuperovat. Váha přívěsu pomůže vrátit podstatnou část energie zpět do baterie."
+                }
+            },
+            en: {
+                title: "EV Towing Assistant",
+                subtitle: "Smart towing range & consumption calculator",
+                labelCar: "1. Electric Vehicle",
+                placeholderCar: "Type make or model (e.g. Tesla, Enyaq...)",
+                labelTrailer: "2. Trailer Type",
+                labelWeight: "3. Total Trailer + Cargo Weight",
+                labelConditions: "4. Route Conditions",
+                labelSpeed: "Highway Cruising Speed",
+                labelTemp: "Outdoor Temperature",
+                labelTerrain: "Route Profile & Elevation",
+                btnCalc: "Calculate & Verify Range",
+                resTheory: "Theoretical Range (to 0%)",
+                resSafe: "Safe Range (with 10% reserve)",
+                resBase: "Original range without trailer:",
+                resCons: "Estimated towing consumption:",
+                resDrop: "Total range reduction:",
+                btnMaps: "Search pull-through EV chargers nearby",
+                supportText: "Do you like this app and did it help you on your roadtrip?",
+                btnSupport: "Support the author with a donation",
+                modalTitle: "☕ Support the developer",
+                modalDesc: "Thank you for supporting the maintenance and development of this app!",
+                modalBank: "Bank Details (Revolut)",
+                modalQrNote: "Scan this QR code in your banking app. Amount is preset to 5 EUR.",
+                overweightWarn: "⚠️ <strong>Warning!</strong> Selected weight ({weight} kg) exceeds the towing capacity of {car} (Max {max} kg).",
+                alertSelectCar: "Please select a vehicle first.",
+                trailers: {
+                    none: "ℹ️ None (Car only)",
+                    small: "🪵 Small open trailer (Low aerodynamic drag)",
+                    boat: "⚓ Flatbed / Boat trailer (Medium drag)",
+                    horses: "🐴 Horsebox / Tall trailer (High drag)",
+                    caravan: "🏠 Large caravan / RV (Extreme wind resistance)"
+                },
+                terrains: {
+                    flat: "⛰️ Flat terrain (Valleys, highways)",
+                    hilly: "⛰️ Hilly / Rolling terrain (Standard highway)",
+                    mountains: "🏔️ Mountainous / Alps (Steep slopes & climbs)"
+                },
+                tempIdeal: "Ideal",
+                tempCold: "Freezing / Heating ❄️",
+                tempHot: "Hot / AC active ☀️",
+                tips: {
+                    balanced: "Your configuration is well balanced. Have a safe trip!",
+                    slowDown: "Slowing down from {speed} km/h to 90 km/h increases your safe range by approx {saved} km and reduces turbulences.",
+                    preheat: "In freezing temperatures, preheat the cabin and battery while plugged in to save driving range.",
+                    recup: "Maximize recuperation on steep downhill mountain roads. Trailer weight will help recover energy back into the battery."
+                }
+            }
+        };
+
+        let currentLang = 'cs';
+
         const evDatabase = [
             { id: "audi_q4_40", name: "Audi Q4 e-tron 40", battery: 76.6, consumption: 18.3, maxTow: 1000 },
             { id: "audi_q8_55", name: "Audi Q8 e-tron 55", battery: 106.0, consumption: 21.4, maxTow: 1800 },
@@ -200,6 +326,91 @@
 
         let selectedCar = null;
 
+        // Načtení lokalizačních textů do UI
+        function updateUI() {
+            const t = langData[currentLang];
+            document.getElementById('ui-title').innerText = t.title;
+            document.getElementById('ui-subtitle').innerText = t.subtitle;
+            document.getElementById('ui-label-car').innerText = t.labelCar;
+            document.getElementById('carSearch').placeholder = t.placeholderCar;
+            document.getElementById('ui-label-trailer').innerText = t.labelTrailer;
+            document.getElementById('ui-label-weight').innerText = t.labelWeight;
+            document.getElementById('ui-label-conditions').innerText = t.labelConditions;
+            document.getElementById('ui-label-speed').innerText = t.labelSpeed;
+            document.getElementById('ui-label-temp').innerText = t.labelTemp;
+            document.getElementById('ui-label-terrain').innerText = t.labelTerrain;
+            document.getElementById('ui-btn-calc').innerText = t.btnCalc;
+            document.getElementById('ui-res-theory').innerText = t.resTheory;
+            document.getElementById('ui-res-safe').innerText = t.resSafe;
+            document.getElementById('ui-res-base').innerText = t.resBase;
+            document.getElementById('ui-res-cons').innerText = t.resCons;
+            document.getElementById('ui-res-drop').innerText = t.resDrop;
+            document.getElementById('ui-btn-maps').innerText = t.btnMaps;
+            document.getElementById('ui-support-text').innerText = t.supportText;
+            document.getElementById('ui-btn-support').innerText = t.btnSupport;
+            document.getElementById('ui-modal-title').innerText = t.modalTitle;
+            document.getElementById('ui-modal-desc').innerText = t.modalDesc;
+            document.getElementById('ui-modal-bank').innerText = t.modalBank;
+            document.getElementById('ui-modal-qr-note').innerText = t.modalQrNote;
+
+            // Dynamické naplnění typů vleků
+            const trailerSelect = document.getElementById('trailerSelect');
+            const currentTrailerVal = trailerSelect.value || "none";
+            trailerSelect.innerHTML = '';
+            for (const [key, label] of Object.entries(t.trailers)) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = label;
+                if (key === currentTrailerVal) opt.selected = true;
+                trailerSelect.appendChild(opt);
+            }
+
+            // Dynamické naplnění terénu
+            const terrainSelect = document.getElementById('terrainSelect');
+            const currentTerrainVal = terrainSelect.value || "flat";
+            terrainSelect.innerHTML = '';
+            for (const [key, label] of Object.entries(t.terrains)) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = label;
+                if (key === currentTerrainVal) opt.selected = true;
+                terrainSelect.appendChild(opt);
+            }
+
+            // Aktualizace slidery textů
+            updateSliderLabels();
+            checkTowingLimit();
+        }
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('lang-cs').className = lang === 'cs' ? "px-3 py-1.5 rounded-lg font-bold transition-all bg-emerald-500 text-gray-950" : "px-3 py-1.5 rounded-lg font-bold transition-all text-gray-400 hover:text-white";
+            document.getElementById('lang-en').className = lang === 'en' ? "px-3 py-1.5 rounded-lg font-bold transition-all bg-emerald-500 text-gray-950" : "px-3 py-1.5 rounded-lg font-bold transition-all text-gray-400 hover:text-white";
+            updateUI();
+            calculateRange();
+        }
+
+        function updateSliderLabels() {
+            const t = langData[currentLang];
+            const weightVal = document.getElementById('weightVal');
+            const weightSlider = document.getElementById('weightSlider');
+            weightVal.innerHTML = parseInt(weightSlider.value).toLocaleString(currentLang === 'cs' ? 'cs-CZ' : 'en-US') + " kg";
+
+            const speedVal = document.getElementById('speedVal');
+            const speedSlider = document.getElementById('speedSlider');
+            speedVal.innerHTML = speedSlider.value + " km/h";
+
+            const tempVal = document.getElementById('tempVal');
+            const tempSlider = document.getElementById('tempSlider');
+            let val = parseInt(tempSlider.value);
+            let note = ` (${t.tempIdeal})`;
+            
+            if (val < 5) note = ` (${t.tempCold})`;
+            else if (val > 28) note = ` (${t.tempHot})`;
+            
+            tempVal.innerHTML = val + " °C" + note;
+        }
+
         // Modal ovládání
         function toggleDonateModal(show) {
             const modal = document.getElementById('donateModal');
@@ -208,43 +419,46 @@
         }
 
         const weightSlider = document.getElementById('weightSlider');
-        const weightVal = document.getElementById('weightVal');
         weightSlider.oninput = function() {
-            weightVal.innerHTML = parseInt(this.value).toLocaleString('cs-CZ') + " kg";
+            updateSliderLabels();
             checkTowingLimit();
+            calculateRange();
         }
 
         const speedSlider = document.getElementById('speedSlider');
-        const speedVal = document.getElementById('speedVal');
-        speedSlider.oninput = function() { speedVal.innerHTML = this.value + " km/h"; }
+        speedSlider.oninput = function() {
+            updateSliderLabels();
+            calculateRange();
+        }
 
         const tempSlider = document.getElementById('tempSlider');
-        const tempVal = document.getElementById('tempVal');
         const conditionsBox = document.getElementById('conditionsBox');
         tempSlider.oninput = function() {
-            let val = parseInt(this.value);
-            let note = " (Ideální)";
+            updateSliderLabels();
             
+            let val = parseInt(this.value);
             conditionsBox.className = "p-4 rounded-xl border mb-6 space-y-4 transition-all duration-300";
             if (val < 5) {
-                note = " (Mrazivo / Topení ❄️)";
                 conditionsBox.classList.add("bg-blue-950/20", "border-blue-500/20");
             } else if (val > 28) {
-                note = " (Horko / Klimatizace ☀️)";
                 conditionsBox.classList.add("bg-amber-955/10", "border-amber-500/20");
             } else {
                 conditionsBox.classList.add("bg-gray-850", "border-gray-800");
             }
-            tempVal.innerHTML = val + " °C" + note;
+            calculateRange();
         }
 
         function checkTowingLimit() {
             if (!selectedCar) return;
             const currentWeight = parseFloat(weightSlider.value);
             const warningBox = document.getElementById('weightWarning');
+            const t = langData[currentLang];
             
             if (currentWeight > selectedCar.maxTow) {
-                warningBox.innerHTML = `⚠️ <strong>Pozor!</strong> Zvolená hmotnost (${currentWeight} kg) překračuje povolený limit tažného zařízení pro ${selectedCar.name} (Max ${selectedCar.maxTow} kg).`;
+                warningBox.innerHTML = t.overweightWarn
+                    .replace('{weight}', currentWeight)
+                    .replace('{car}', selectedCar.name)
+                    .replace('{max}', selectedCar.maxTow);
                 warningBox.classList.remove('hidden');
             } else {
                 warningBox.classList.add('hidden');
@@ -262,7 +476,7 @@
 
             const filtered = evDatabase.filter(car => car.name.toLowerCase().includes(query));
             if (filtered.length === 0) {
-                dropdown.innerHTML = `<div class="p-3 text-sm text-gray-500 text-center">Auto nenalezeno</div>`;
+                dropdown.innerHTML = `<div class="p-3 text-sm text-gray-500 text-center">${currentLang === 'cs' ? 'Auto nenalezeno' : 'Car not found'}</div>`;
                 dropdown.classList.remove('hidden');
                 return;
             }
@@ -283,9 +497,10 @@
             dropdown.classList.add('hidden');
             searchInput.classList.add('hidden');
             document.getElementById('badgeName').innerText = car.name;
-            document.getElementById('badgeSpecs').innerText = `Baterie: ${car.battery} kWh | Max. tažné: ${car.maxTow} kg`;
+            document.getElementById('badgeSpecs').innerText = `${currentLang === 'cs' ? 'Baterie' : 'Battery'}: ${car.battery} kWh | Max. tow: ${car.maxTow} kg`;
             badge.classList.remove('hidden');
             checkTowingLimit();
+            calculateRange();
         }
 
         function clearCarSelection() {
@@ -294,15 +509,18 @@
             document.getElementById('weightWarning').classList.add('hidden');
             searchInput.classList.remove('hidden');
             searchInput.focus();
-            document.getElementById('resultBox').classList.add('hidden');
+            
+            // Nastavit výchozí hodnoty na nuly/pomlčky
+            document.getElementById('baseRange').innerText = "-- km";
+            document.getElementById('newConsumption').innerText = "-- kWh/100 km";
+            document.getElementById('towingRange').innerText = "-- km";
+            document.getElementById('safeRange').innerText = "-- km";
+            document.getElementById('dropPercent').innerText = "-- %";
+            document.getElementById('smartTipText').innerText = "--";
         }
 
         function calculateRange() {
-            if (!selectedCar) {
-                alert("Zvolte nejdříve vozidlo.");
-                searchInput.focus();
-                return;
-            }
+            if (!selectedCar) return;
 
             const trailerKey = document.getElementById('trailerSelect').value;
             const weight = parseFloat(weightSlider.value);
@@ -310,6 +528,7 @@
             const temperature = parseFloat(tempSlider.value);
             const terrain = document.getElementById('terrainSelect').value;
             const config = trailerConfig[trailerKey];
+            const t = langData[currentLang];
 
             const baseRange = (selectedCar.battery / selectedCar.consumption) * 100;
             const speedFactor = Math.pow(speed / 95, 2);
@@ -336,18 +555,28 @@
 
             let dropPercent = ((baseRange - finalRange) / baseRange) * 100;
 
-            let tipText = "Vaše konfigurace je vyvážená. Šťastnou cestu!";
+            // Dynamický asistent a rady
+            let tipText = t.tips.balanced;
             if (trailerKey !== 'none' && speed > 95) {
                 let savedKm = Math.round(finalRange * 0.18);
-                tipText = `Zpomalením ze ${speed} km/h na 90 km/h zvýšíte bezpečný dojezd přibližně o ${savedKm} km and snížíte turbulence za vozidlem.`;
+                tipText = t.tips.slowDown.replace('{speed}', speed).replace('{saved}', savedKm);
             } else if (temperature < 0) {
-                tipText = "V mrazu doporučujeme předhřát auto i baterii ještě během připojení na nabíječku, ušetříte energii na topení za jízdy.";
+                tipText = t.tips.preheat;
             } else if (terrain === 'mountains') {
-                tipText = "Při jízde z kopce v horách nechte auto maximálně rekuperovat. Váha přívěsu pomůže vrátit podstatnou část energie zpět do baterie.";
+                tipText = t.tips.recup;
             }
 
+            // Google Maps vyhledávání na míru
+            let query = "ev charging station caravan pull through";
+            if (currentLang === 'cs') {
+                query = "nabijeci stanice pro elektromobily s privesem";
+            }
+            if (trailerKey === 'small') {
+                query = currentLang === 'cs' ? "nabijeci stanice elektromobil" : "ev charging station";
+            }
+            
             const mapsBtn = document.getElementById('mapsButton');
-            mapsBtn.href = `http://googleusercontent.com/maps.google.com/3`;
+            mapsBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 
             document.getElementById('baseRange').innerText = Math.round(baseRange) + " km";
             document.getElementById('newConsumption').innerText = currentConsumption.toFixed(1) + " kWh/100 km";
@@ -355,8 +584,16 @@
             document.getElementById('safeRange').innerText = Math.round(safeRange) + " km";
             document.getElementById('dropPercent').innerText = Math.round(dropPercent) + " %";
             document.getElementById('smartTipText').innerText = tipText;
-            
-            document.getElementById('resultBox').classList.remove('hidden');
+        }
+
+        // Spuštění po načtení
+        window.onload = function() {
+            updateUI();
+            // Pre-selektovat auto při startu pro lepší UX bez prázdných míst
+            const defaultCar = evDatabase.find(c => c.id === "tesla_y_lr");
+            if (defaultCar) {
+                selectCar(defaultCar);
+            }
         }
     </script>
 </body>
