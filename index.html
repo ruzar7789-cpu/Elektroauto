@@ -21,7 +21,6 @@
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- JAZYKOVÝ PŘEPÍNAČ -->
     <div class="w-full max-w-xl flex justify-end mb-2">
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-1 flex gap-1 text-xs">
             <button onclick="switchLanguage('cs')" id="lang-cs" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-emerald-500 text-gray-950">CZ 🇨🇿</button>
@@ -35,7 +34,6 @@
         </h1>
         <p class="text-gray-400 text-center text-sm mb-6" id="ui-subtitle">Chytrý asistent pro jízdu s přívěsem</p>
         
-        <!-- 1. VÝBĚR AUTA -->
         <div class="mb-5 relative">
             <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400" id="ui-label-car">1. Elektromobil</label>
             <input type="text" id="carSearch" class="w-full bg-gray-800 border border-gray-750 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
@@ -51,15 +49,12 @@
             </div>
         </div>
 
-        <!-- 2. TYP NÁKLADU -->
         <div class="mb-5">
             <label class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400" id="ui-label-trailer">2. Typ přívěsu</label>
             <select id="trailerSelect" onchange="calculateRange()" class="w-full bg-gray-800 border border-gray-750 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                <!-- Naplněno dynamicky podle jazyka -->
-            </select>
+                </select>
         </div>
 
-        <!-- 3. HMOTNOST NÁKLADU -->
         <div class="mb-5">
             <div class="flex justify-between text-xs font-bold uppercase tracking-wider mb-1.5 text-gray-400">
                 <span id="ui-label-weight">3. Celková hmotnost vlek + náklad</span>
@@ -67,17 +62,13 @@
             </div>
             <input type="range" id="weightSlider" min="0" max="3500" step="50" value="1200" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             
-            <!-- Varování o přetížení -->
             <div id="weightWarning" class="mt-2 p-2.5 bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs rounded-lg hidden">
-                <!-- Dynamické varování -->
-            </div>
+                </div>
         </div>
 
-        <!-- 4. PODMÍNKY -->
         <div class="bg-gray-850 p-4 rounded-xl border border-gray-800 mb-6 space-y-4 transition-colors duration-300" id="conditionsBox">
             <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-500/80 mb-2" id="ui-label-conditions">4. Podmínky na trase</h3>
             
-            <!-- Rychlost -->
             <div>
                 <div class="flex justify-between text-sm mb-1">
                     <span class="text-gray-300" id="ui-label-speed">Cestovní rychlost na dálnici</span>
@@ -86,7 +77,6 @@
                 <input type="range" id="speedSlider" min="80" max="130" step="5" value="110" class="w-full h-1.5 bg-gray-750 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
 
-            <!-- Teplota -->
             <div>
                 <div class="flex justify-between text-sm mb-1">
                     <span class="text-gray-300" id="ui-label-temp">Venkovní teplota</span>
@@ -95,21 +85,17 @@
                 <input type="range" id="tempSlider" min="-10" max="35" step="5" value="20" class="w-full h-1.5 bg-gray-750 rounded-lg appearance-none cursor-pointer accent-emerald-500">
             </div>
 
-            <!-- Terén -->
             <div>
                 <label class="block text-sm mb-1 text-gray-300" id="ui-label-terrain">Profil a převýšení trasy</label>
                 <select id="terrainSelect" onchange="calculateRange()" class="w-full bg-gray-800 border border-gray-750 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                    <!-- Naplněno dynamicky -->
-                </select>
+                    </select>
             </div>
         </div>
 
-        <!-- VÝPOČET -->
         <button onclick="calculateRange()" id="ui-btn-calc" class="w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold py-3.5 px-4 rounded-xl transition duration-200 transform active:scale-[0.98] shadow-lg shadow-emerald-500/10 mb-6">
             Vypočítat a zkontrolovat trasu
         </button>
 
-        <!-- VÝSLEDKY -->
         <div id="resultBox" class="mt-6 p-5 bg-gray-850 border border-gray-800 rounded-xl space-y-4 mb-6">
             <div class="grid grid-cols-2 gap-4 text-center">
                 <div class="bg-gray-900/60 p-3 rounded-xl border border-gray-800">
@@ -122,26 +108,22 @@
                 </div>
             </div>
 
-            <!-- Specifikace a spotřeba -->
             <div class="border-t border-gray-800 pt-3 text-xs text-gray-400 space-y-1.5">
                 <div class="flex justify-between"><span id="ui-res-base">Původní dojezd bez nákladu:</span><span id="baseRange" class="font-medium text-gray-200">-- km</span></div>
                 <div class="flex justify-between"><span id="ui-res-cons">Předpokládaná spotřeba s vlekem:</span><span id="newConsumption" class="font-medium text-gray-200">-- kWh/100 km</span></div>
                 <div class="flex justify-between text-rose-400"><span id="ui-res-drop">Celkový pokles energie:</span><span id="dropPercent">-- %</span></div>
             </div>
 
-            <!-- Inteligentní asistent - Tipy pro řidiče -->
             <div id="smartTipBox" class="p-3 bg-blue-950/30 border border-blue-500/20 text-blue-300 text-xs rounded-xl flex items-start gap-2">
                 <span>💡</span>
                 <p id="smartTipText">--</p>
             </div>
 
-            <!-- Mapové tlačítko -->
             <a id="mapsButton" target="_blank" class="w-full bg-gray-800 hover:bg-gray-750 border border-gray-700 text-white font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer">
                 🔍 <span id="ui-btn-maps">Vyhledat velké nabíječky pro soupravy v okolí</span>
             </a>
         </div>
 
-        <!-- SEKCE PODPORY -->
         <div class="border-t border-gray-800 pt-4 mt-6 text-center">
             <p class="text-xs text-gray-500 mb-2" id="ui-support-text">Líbí se vám tato aplikace a pomohla vám na cestách?</p>
             <button onclick="toggleDonateModal(true)" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold py-2 px-4 rounded-xl text-xs transition duration-200 shadow-md">
@@ -150,7 +132,6 @@
         </div>
     </div>
 
-    <!-- MODAL OKNO S REVOLUTEM -->
     <div id="donateModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl max-w-sm w-full text-center relative shadow-2xl">
             <button onclick="toggleDonateModal(false)" class="absolute top-3 right-4 text-gray-400 hover:text-white font-bold text-lg">✕</button>
@@ -158,25 +139,22 @@
             <h3 class="text-xl font-black text-amber-400 mb-1" id="ui-modal-title">☕ Dobrovolná podpora</h3>
             <p class="text-xs text-gray-400 mb-4" id="ui-modal-desc">Děkuji za jakoukoliv podporu provozu a vývoje!</p>
             
-            <!-- Rychlá tlačítka pro dary přes revolut.me -->
             <div class="grid grid-cols-3 gap-2 mb-4">
                 <a href="https://revolut.me/marceldrvota/5" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">5 EUR</a>
                 <a href="https://revolut.me/marceldrvota/10" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">10 EUR</a>
                 <a href="https://revolut.me/marceldrvota/20" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">20 EUR</a>
             </div>
 
-            <!-- IBAN A BIC (Tvůj Revolut) -->
-            <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 mb-4 text-left select-all cursor-pointer" title="Kliknutím označíte text">
+            <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 mb-4 text-left select-all cursor-pointer" title="Kliknutím označíte text" onclick="copyToClipboard()">
                 <span class="text-gray-500 block text-[10px] uppercase tracking-wider font-bold mb-1" id="ui-modal-bank">Bankovní spojení (Revolut)</span>
                 <div class="text-xs space-y-1">
-                    <p class="font-mono text-gray-200"><strong class="text-gray-400">IBAN:</strong> LT80 3250 0696 3376 1109</p>
+                    <p class="font-mono text-gray-200"><strong class="text-gray-400">IBAN:</strong> <span id="ibanText">LT80 3250 0696 3376 1109</span></p>
                     <p class="font-mono text-gray-200"><strong class="text-gray-400">BIC / SWIFT:</strong> REVOLT21</p>
                 </div>
             </div>
 
-            <!-- EPC QR KÓD -->
             <div class="bg-white p-3 rounded-xl inline-block mb-3">
-                <img id="qrCodeImg" src="https://api.paylibo.com/paylibo/generator/image?iban=LT803250069633761109&amount=5.00&currency=EUR&message=Donate%20EV%20Assistant&size=180" alt="QR Platba Revolut" class="w-40 h-40">
+                <img id="qrCodeImg" src="https://api.paylibo.com/paylibo/generator/image?iban=LT803250069633761109&amount=5.00&currency=EUR&message=Donate%20EV%20Assistant&size=180" alt="QR Platba Revolut" class="w-40 h-40 select-none pointer-events-none">
             </div>
             
             <p class="text-[10px] text-gray-500" id="ui-modal-qr-note">Naskenujte QR kód ve své bankovní aplikaci. Částka je přednastavena na 5 EUR (lze ji v bance libovolně změnit).</p>
@@ -285,7 +263,6 @@
         };
 
         let currentLang = 'cs';
-
         const evDatabase = [
             { id: "audi_q4_40", name: "Audi Q4 e-tron 40", battery: 76.6, consumption: 18.3, maxTow: 1000 },
             { id: "audi_q8_55", name: "Audi Q8 e-tron 55", battery: 106.0, consumption: 21.4, maxTow: 1800 },
@@ -314,9 +291,7 @@
             { id: "vw_id4_pro", name: "Volkswagen ID.4 Pro", battery: 77.0, consumption: 17.2, maxTow: 1000 },
             { id: "vw_id7_pro", name: "Volkswagen ID.7 Pro", battery: 77.0, consumption: 15.3, maxTow: 1000 },
             { id: "vw_id_buzz", name: "Volkswagen ID. Buzz Pro", battery: 77.0, consumption: 21.5, maxTow: 1000 }
-        ];
-
-        const trailerConfig = {
+        ];const trailerConfig = {
             none: { aero: 1.0, weightImpact: 0.0 },
             small: { aero: 1.18, weightImpact: 0.07 },
             boat: { aero: 1.45, weightImpact: 0.11 },
@@ -409,6 +384,16 @@
             else if (val > 28) note = ` (${t.tempHot})`;
             
             tempVal.innerHTML = val + " °C" + note;
+        }
+
+        // Pomocná funkce na kopírování IBANu do schránky
+        function copyToClipboard() {
+            const ibanText = document.getElementById('ibanText').innerText.replace(/\s/g, '');
+            navigator.clipboard.writeText(ibanText).then(() => {
+                alert(currentLang === 'cs' ? 'IBAN byl zkopírován do schránky!' : 'IBAN copied to clipboard!');
+            }).catch(err => {
+                console.error('Chyba při kopírování: ', err);
+            });
         }
 
         // Modal ovládání
@@ -566,7 +551,7 @@
                 tipText = t.tips.recup;
             }
 
-            // Google Maps vyhledávání na míru
+            // Google Maps vyhledávání na míru (Opraveno: doplněn $ znak do šablony)
             let query = "ev charging station caravan pull through";
             if (currentLang === 'cs') {
                 query = "nabijeci stanice pro elektromobily s privesem";
@@ -598,3 +583,4 @@
     </script>
 </body>
 </html>
+        
