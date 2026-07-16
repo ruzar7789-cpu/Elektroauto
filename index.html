@@ -139,10 +139,13 @@
             <h3 class="text-xl font-black text-amber-400 mb-1" id="ui-modal-title">☕ Dobrovolná podpora</h3>
             <p class="text-xs text-gray-400 mb-4" id="ui-modal-desc">Děkuji za jakoukoliv podporu provozu a vývoje!</p>
             
-            <div class="grid grid-cols-3 gap-2 mb-4">
-                <a href="https://revolut.me/marceldrvota/5" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">5 EUR</a>
-                <a href="https://revolut.me/marceldrvota/10" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">10 EUR</a>
-                <a href="https://revolut.me/marceldrvota/20" target="_blank" class="bg-gray-800 hover:bg-emerald-500 hover:text-gray-950 text-white font-bold py-2 rounded-xl text-xs transition">20 EUR</a>
+            <div class="space-y-2 mb-4">
+                <a href="https://revolut.me/mdrvota" target="_blank" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-gray-950 font-bold py-3 rounded-xl text-xs transition shadow-md">
+                    💳 Otevřít Revolut profil (revolut.me)
+                </a>
+                <button onclick="copyRevolutLink()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2 rounded-xl text-xs transition border border-gray-700">
+                    📋 Kopírovat odkaz do prohlížeče
+                </button>
             </div>
 
             <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 mb-4 text-left select-all cursor-pointer" title="Kliknutím označíte text" onclick="copyToClipboard()">
@@ -261,7 +264,6 @@
                 }
             }
         };
-
         let currentLang = 'cs';
         const evDatabase = [
             { id: "audi_q4_40", name: "Audi Q4 e-tron 40", battery: 76.6, consumption: 18.3, maxTow: 1000 },
@@ -291,7 +293,9 @@
             { id: "vw_id4_pro", name: "Volkswagen ID.4 Pro", battery: 77.0, consumption: 17.2, maxTow: 1000 },
             { id: "vw_id7_pro", name: "Volkswagen ID.7 Pro", battery: 77.0, consumption: 15.3, maxTow: 1000 },
             { id: "vw_id_buzz", name: "Volkswagen ID. Buzz Pro", battery: 77.0, consumption: 21.5, maxTow: 1000 }
-        ];const trailerConfig = {
+        ];
+
+        const trailerConfig = {
             none: { aero: 1.0, weightImpact: 0.0 },
             small: { aero: 1.18, weightImpact: 0.07 },
             boat: { aero: 1.45, weightImpact: 0.11 },
@@ -391,6 +395,15 @@
             const ibanText = document.getElementById('ibanText').innerText.replace(/\s/g, '');
             navigator.clipboard.writeText(ibanText).then(() => {
                 alert(currentLang === 'cs' ? 'IBAN byl zkopírován do schránky!' : 'IBAN copied to clipboard!');
+            }).catch(err => {
+                console.error('Chyba při kopírování: ', err);
+            });
+        }
+
+        // Pomocná funkce na kopírování Revolut odkazu (opraveno mdrvota)
+        function copyRevolutLink() {
+            navigator.clipboard.writeText("https://revolut.me/mdrvota").then(() => {
+                alert(currentLang === 'cs' ? 'Revolut odkaz byl zkopírován!' : 'Revolut link copied!');
             }).catch(err => {
                 console.error('Chyba při kopírování: ', err);
             });
@@ -551,7 +564,7 @@
                 tipText = t.tips.recup;
             }
 
-            // Google Maps vyhledávání na míru (Opraveno: doplněn $ znak do šablony)
+            // Google Maps vyhledávání na míru
             let query = "ev charging station caravan pull through";
             if (currentLang === 'cs') {
                 query = "nabijeci stanice pro elektromobily s privesem";
@@ -583,4 +596,3 @@
     </script>
 </body>
 </html>
-        
